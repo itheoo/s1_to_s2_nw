@@ -26,15 +26,15 @@ class DatasetFromFolder(data.Dataset):
     def __getitem__(self, index):
         a = Image.open(join(self.a_path, self.image_filenames[index])).convert('RGB')
         b = Image.open(join(self.b_path, self.image_filenames[index])).convert('RGB')
-        a = a.resize((497, 497), Image.BICUBIC)
-        b = b.resize((497, 497), Image.BICUBIC)
+        a = a.resize((542, 542), Image.BICUBIC)
+        b = b.resize((542, 542), Image.BICUBIC)
         a = transforms.ToTensor()(a)
         b = transforms.ToTensor()(b)
-        w_offset = random.randint(0, max(0, 497 - 467 - 1))
-        h_offset = random.randint(0, max(0, 497 - 467 - 1))
+        w_offset = random.randint(0, max(0, 542 - 512 - 1))
+        h_offset = random.randint(0, max(0, 542 - 512 - 1))
     
-        a = a[:, h_offset:h_offset + 467, w_offset:w_offset + 467]
-        b = b[:, h_offset:h_offset + 467, w_offset:w_offset + 467]
+        a = a[:, h_offset:h_offset + 512, w_offset:w_offset + 512]
+        b = b[:, h_offset:h_offset + 512, w_offset:w_offset + 512]
     
         a = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(a)
         b = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(b)
