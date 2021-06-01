@@ -56,12 +56,11 @@ testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batc
 device = torch.device("cuda:0" if opt.cuda else "cpu")
 
 print('===> Building models')
-#net_g = define_G(opt.input_nc, opt.output_nc, opt.ngf, 'batch', False, 'normal', 0.02, gpu_id=device)
-#net_d = define_D(opt.input_nc + opt.output_nc, opt.ndf, 'basic', gpu_id=device)
+net_g = define_G(opt.input_nc, opt.output_nc, opt.ngf, 'batch', False, 'normal', 0.02, gpu_id=device)
+net_d = define_D(opt.input_nc + opt.output_nc, opt.ndf, 'basic', gpu_id=device)
 
-net_g = torch.load('train_model/netG_model_epoch_100.pth')
-net_d = torch.load('train_model/netD_model_epoch_100.pth')
-
+#net_g = torch.load('train_model/netG_model_epoch_100.pth')
+#net_d = torch.load('train_model/netD_model_epoch_100.pth')
 
 criterionGAN = GANLoss().to(device)
 criterionL1 = nn.L1Loss().to(device)
@@ -72,6 +71,21 @@ optimizer_g = optim.Adam(net_g.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)
 optimizer_d = optim.Adam(net_d.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 net_g_scheduler = get_scheduler(optimizer_g, opt)
 net_d_scheduler = get_scheduler(optimizer_d, opt)
+
+checkpoint_g = torch.load('train_model/netG_model_epoch_100.pth')
+net_g.load_state_dict(checkpoint_g['model_state_dict'])
+optimizer_g.load_state_dict(checkpoint_g['optimizer_state_dict'])
+loss_g = checkpoint_g['loss']
+
+checkpoint_d = torch.load('train_model/netD_model_epoch_100.pth')
+net_d.load_state_dict(checkpoint_d['model_state_dict'])
+optimizer_d.load_state_dict(checkpoint_d['optimizer_state_dict'])
+loss_g = checkpoint_d['loss']
+
+epoch = checkpoint_g['epoch']
+net_g.eval()
+net_d.eval()
+
 
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
     # train
