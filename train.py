@@ -72,19 +72,19 @@ optimizer_d = optim.Adam(net_d.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999)
 net_g_scheduler = get_scheduler(optimizer_g, opt)
 net_d_scheduler = get_scheduler(optimizer_d, opt)
 
-checkpoint_g = torch.load('train_model/netG_model_epoch_100.pth')
-net_g.load_state_dict(checkpoint_g['model_state_dict'])
-optimizer_g.load_state_dict(checkpoint_g['optimizer_state_dict'])
-loss_g = checkpoint_g['loss']
+# checkpoint_g = torch.load('train_model/netG_model_epoch_100.pth')
+# net_g.load_state_dict(checkpoint_g['model_state_dict'])
+# optimizer_g.load_state_dict(checkpoint_g['optimizer_state_dict'])
+# loss_g = checkpoint_g['loss']
 
-checkpoint_d = torch.load('train_model/netD_model_epoch_100.pth')
-net_d.load_state_dict(checkpoint_d['model_state_dict'])
-optimizer_d.load_state_dict(checkpoint_d['optimizer_state_dict'])
-loss_g = checkpoint_d['loss']
+# checkpoint_d = torch.load('train_model/netD_model_epoch_100.pth')
+# net_d.load_state_dict(checkpoint_d['model_state_dict'])
+# optimizer_d.load_state_dict(checkpoint_d['optimizer_state_dict'])
+# loss_g = checkpoint_d['loss']
 
-epoch = checkpoint_g['epoch']
-net_g.eval()
-net_d.eval()
+# epoch = checkpoint_g['epoch']
+# net_g.eval()
+# net_d.eval()
 
 
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
@@ -137,22 +137,24 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
 
         optimizer_g.step()
 
-        print("===> Epoch[{}]({}/{}): Loss_D: {:.4f} Loss_G: {:.4f}".format(
-            epoch, iteration, len(training_data_loader), loss_d.item(), loss_g.item()))
+        # print("===> Epoch[{}]({}/{}): Loss_D: {:.4f} Loss_G: {:.4f}".format(
+        #     epoch, iteration, len(training_data_loader), loss_d.item(), loss_g.item()))
 
     update_learning_rate(net_g_scheduler, optimizer_g)
     update_learning_rate(net_d_scheduler, optimizer_d)
 
     # test
     avg_psnr = 0
+    m = 0
     for batch in testing_data_loader:
         input, target = batch[0].to(device), batch[1].to(device)
 
         prediction = net_g(input)
         mse = criterionMSE(prediction, target)
-        psnr = 10 * log10(1 / mse.item())
-        avg_psnr += psnr
-    print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
+        m = m + mse.item()
+        # psnr = 10 * log10(1 / mse.item())
+        # avg_psnr += psnr
+    print("===> Avg. MSE: {:.4f} ".format(m / len(testing_data_loader)))
 
     #checkpoint
     if epoch % 20 == 0:
